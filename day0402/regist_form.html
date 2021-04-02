@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">    
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+<style>
+body {font-family: Arial, Helvetica, sans-serif;}
+* {box-sizing: border-box;}
+
+input[type=text],input[type=password]{
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  margin-top: 6px;
+  margin-bottom: 16px;
+  resize: vertical;
+}
+
+input[type=button] {
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+input[type=button]:hover {
+  background-color: #45a049;
+}
+
+.container {
+  border-radius: 5px;
+  background-color: #f2f2f2;
+  padding: 20px;
+}
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    //jQuery 문법형식 >   (누구를).어떻게       >누구를 자리에 올 수 있는 요소 : 셀렉터
+    // $(document).ready();
+    $(function(){ //onLoad기능
+        $("input[type=button]").click(function(){
+            //유효성 체크
+            if($("#user_id").val()==""){
+                alert("아이디를 입력하세요.");
+                return;
+            }
+
+            $("form").attr("action","http://localhost:7777/param");
+            $("form").attr("method","post");//전송 방식을 post로 변경  > 전에는 get방식이기 때문에 주소창에 노출됨
+            $("form").submit();
+        });
+    });
+</script>
+</head>
+<body>
+
+<h3>Contact Form</h3>
+
+<div class="container">
+    <!-- form태그의 속성 중 action은 이 폼 양식을 전송할 대상 서버의 url을 명시할 수 있다. -->
+  <form action="http://daum.net">
+    <label for="user_id">ID</label>
+    <input type="text" id="user_id" name="user_id" placeholder="Your ID..">
+
+    <label for="user_pass">PASSWORD</label>
+    <input type="password" id="user_pass" name="user_pass" placeholder="Your password..">
+
+    <label for="user_name">NAME</label>
+    <input type="text" id="user_name" name="user_name" placeholder="Your Name..">
+
+    <!-- input 태그의 type중 submit는 디폴트로 전송 기능이 포함되어 있기때문에
+    클릭 만으로도 전송이 발생함
+    button을 사용해서 일반 버튼화 시켜놓았다 -->
+    <input type="button" value="Submit">
+  </form>
+</div>
+
+</body>
+</html>

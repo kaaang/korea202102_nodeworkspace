@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+<style>
+    #wrapper{
+        width: 1500px;
+        height: 900px;
+        background-color: aquamarine;
+        margin: auto;
+        position: relative;
+        top: 200px;
+    }
+    #show{
+        width: 900px;
+        height: 100%;
+        background-color:cadetblue;
+        background-image: url(../platformer_game/images/4.jpg);
+        background-repeat: no-repeat;
+        background-size: 900px 900px;
+        float: left;
+    }
+    #content{
+        width: 600px;
+        height: 100%;
+        float: left;
+        background-color: coral;
+    }
+    #content{
+        box-sizing: border-box;
+        font-size: 25px;
+        padding: 180px 100px;
+    }
+    input, #clear{
+        font-size: 25px;
+        
+    }
+</style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(function(){
+        $("input[type=button]").click(function(){
+            if($("#user_id").val()==""){
+                $("#user_id").focus();
+                alert("ID를 입력하세요.");
+                return;
+            }else if($("#user_pass").val()==""){
+                $("#user_pass").focus();
+                alert("Password를 입력하세요.");
+                return;
+            }else if($("#user_name").val()==""){
+                $("#user_name").focus();
+                alert("Name를 입력하세요.");
+                return;
+            }
+        })
+    });
+</script>
+
+
+
+
+</head>
+<body>
+    <div id="wrapper">
+        <div id="show"></div>
+        <div id="content">
+            <h1>Hello</h1>
+            <form>
+                <label for="user_id">ID</label><br>
+                <input id="user_id" type="text" placeholder="Your ID..."><br>
+
+                <label for="user_pass">Password</label><br>
+                <input id="user_pass" type="password" placeholder="Your Password..."><br>
+
+                <label for="user_name">Name</label><br>
+                <input id="user_name" type="text" placeholder="Your Name..."><br>
+    
+                <br>
+                <input type="button" value="Submit">
+                <button id="clear">Clear</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

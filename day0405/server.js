@@ -1,6 +1,7 @@
 var http = require("http");
 var fs=require("fs");
 var qs=require("querystring");//전송한 직렬화된 데이터에 대한 해석을 담당(문자열로 해석 가능)
+var url=require("url");
 var mysql=require("mysql");//외부 모듈 이므로 별도 설치 필요
 //npm install mysql
 var ejs=require("ejs");//ejs 모듈을 가져오기(외부모듈)
@@ -30,7 +31,9 @@ var server=http.createServer(function(request, response){
     회원 정보 삭제 요청 :  /member/del
     */
 
-    switch(request.url){
+    // console.log("파싱결과",url.parse(request.url));
+    var requestUrl=url.parse(request.url).pathname;
+    switch(requestUrl){
         case "/member/form" : registForm(request, response);break;
         case "/member/join" : join(request, response);break;
         case "/member/list" : getList2(request, response);break;
@@ -80,6 +83,7 @@ function join(request, response){
             }else{
                 response.writeHead(200,{"Content-Type":"text/html;charset=utf-8"});
                 response.end("회원가입 성공<br><a href='/member/list'>회원 목록 바로가기</a>");
+                // response.redirect("/member/list");
             }
             //db작업 송공 여부와 상관없이 연결된 접속은 끊어야 한다.
             con.end();//접속 끊기
@@ -156,11 +160,95 @@ function join(request, response){
         });
     }
     function getDetail(request, response){
+        //한 사람에 대한 정보 가져오기
+        //mysql에 접속을 먼저 해야한다.
+        var con = mysql.createConnection(conStr);
 
+        //get방식은 body를 통해 넘겨지는 post방식에 비해 header를 타고 전송되어오므로
+        //추출하기가 편하다.(마치 봉투의 겉면)
+        //쿼리문에서 사용되는 pk값은, 클라이언트가 전송한 값으로 대체해버리자
+        // console.log("url : ",request.url);
+        //쿼리스트링 : 포스트방식의 파라미터 추출
+        //url : get방식의 파라미터 추출
+
+        // console.log("url을 분석 및 파싱한 결과",url.parse(request.url));
+        // console.log("추출 : ",url.parse(request.url,true).query);
+        var param=url.parse(request.url,true).query;
+        var member_id=param.member_id;//곧 클라이언트가 넘긴 값으로 대체
+        // console.log("id : ",member_id);
+        // console.log("클라이언트가 전송한 member_id 파라미터 : ",member_id);
+        var sql = "select * from member where member_id="+member_id;
+        // response.end("test");
+        con.query(sql,function(err,result,fields){
+            // console.log(result);
+            fs.readFile("./detail.ejs","utf8",function(err,data){
+                if(err){
+                    console.log(err);
+                }else{
+                    response.writeHead(200,{"Content-Type":"text/html;charset=utf-8"});
+                    response.end(ejs.render(data,{
+                        record:result[0] //한건이라 할지라도, select문의 결과는 배열이기 때문에 0번째를 추출
+                    }));
+                }
+                con.end();
+            });
+        });
+        
+        // response.end("상세보기를 원하는군요");
     }
     function edit(request, response){
+        //쿼리문에 사용될 4개의 파라미터값을 받아서 변수에 담아보자
+        //글 수정은 클라이언트로부터 post 방식으로 서버에 전송되기 때문에,
+        //그 데이터가 bodt에 들어있다
+        //body에 들어있는 파라미터를 추출하기 위한 모듈이 쿼리스트링
+        
+        //post방식의 데이터는 버퍼에 담겨오기 때문에, 이 따로따로 직렬화되어 분산되 데이터를
+        //일단 문자열로 모아서 처리해야 한다.
+        
+        var content="";
+        request.on("data",function(data){
+            // console.log(data);
+            content+=data;//쪼개진 데이터 모으기
+        });
+        request.on("end",function(){
+            //이 시점이 파라미터가 하나의 문자열로 복원된 시점
+            var obj=qs.parse(content);
+            console.log(obj);
+            var sql="update member set user_id='"+obj.user_id+"', user_pass='";
+            sql+=obj.user_pass+"', user_name='"+obj.user_name+"'";
+            sql+=" where member_id="+obj.member_id;
 
+            var con=mysql.createConnection(conStr);
+            con.query(sql, function(err,field){
+                if(err){
+                    console.log(err);
+                }else{
+                    response.writeHead(200,{"Content-Type":"text/html;charset=utf-8"});
+                    response.end("<script>alert('수정되었습니다.');location.herf='/member/detail?member_id="+obj.member_id+"';</script>");
+                }
+            });
+
+        });
+        
     }
     function del(request, response){
+        var param=url.parse(request.url, true).query;
+        console.log("클라이언트가 전송한 파라미터틑",param);
+        var sql="delete from member where member_id="+param.member_id;
+        
+        //쿼리문 구성이 끝났으므로 mysql에 접속하여 해상 쿼리를 실행
+        var con = mysql.createConnection(conStr);//접속 및 커넥션 객체 반환
+
+        //select문의 경우엔 결과를 가져와야 하기 때문에 가운데 인수, rewult인수가 필요하지만
+        //delete, update, insert DML은 가져올 레코드가 없기 때문에 인수가 2개면 충분함
+        con.query(sql,function(err, fields){
+            if(err){
+                console.log(err);
+            }else{
+                response.writeHead(200,{"Content-Type":"text/html;charset=utf-8"});
+                response.end("<script>alert('삭제완료');location.href='/member/list';</script>");
+            }
+            con.end();//mysql 접속 끊기
+        });
 
     }

@@ -43,7 +43,7 @@ input[type=button]:hover {
     //jQuery 문법형식 >   (누구를).어떻게       >누구를 자리에 올 수 있는 요소 : 셀렉터
     // $(document).ready();
     $(function(){ //onLoad기능
-        $("input[type=button]").click(function(){
+        $($("input[type=button]")[0]).click(function(){
             //유효성 체크
             if($("#user_id").val()==""){
                 alert("아이디를 입력하세요.");
@@ -53,6 +53,10 @@ input[type=button]:hover {
             $("form").attr("action","/member/join");
             $("form").attr("method","post");//전송 방식을 post로 변경  > 전에는 get방식이기 때문에 주소창에 노출됨
             $("form").submit();
+        });
+
+        $($("input[type=button]")[1]).click(function(){
+          location.href="/member/list"; //get방식의 요청
         });
     });
 </script>
@@ -84,6 +88,7 @@ input[type=button]:hover {
     클릭 만으로도 전송이 발생함
     button을 사용해서 일반 버튼화 시켜놓았다 -->
     <input type="button" value="Submit">
+    <input type="button" value="List">
   </form>
 </div>
 

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/css/admin_topnavi.css">
+<style>
+body {font-family: Arial, Helvetica, sans-serif;}
+* {box-sizing: border-box;}
+
+input[type=text], select, textarea ,input[type=file]{
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  margin-top: 6px;
+  margin-bottom: 16px;
+  resize: vertical;
+}
+
+input[type=button] {
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+input[type=button]:hover {
+  background-color: #45a049;
+}
+
+.container {
+  border-radius: 5px;
+  background-color: #f2f2f2;
+  padding: 20px;
+}
+</style>
+<script>
+    function getSubList(obj){
+        // location.href="/admin/product/sublist?topcategory_id="+obj.value;
+
+        //비동기로 시도
+        var xhttp=new XMLHttpRequest();
+        xhttp.onreadystatechange=function(){//비동기 객체의 완료 시점을 알기 위해서 사용
+          if(this.readyState==4 && this.status==200){
+            // alert(this.responseText); //서버가 보낸 데이터가 문자열이라 파싱이 필요합
+            var subArray = JSON.parse(this.responseText);
+            var subcategory_id = document.getElementById("subcategory_id");
+
+            //한번 다 지우기
+
+            var len = subcategory_id.length;
+            for(var j=0;j<len;j++){
+              subcategory_id.remove(1);
+            }
+
+            for(var i=0;i<subArray.length;i++){
+              var sub = subArray[i]
+              var op = document.createElement("option");
+              op.text=sub.sub_name;
+              op.value=sub.subcategory_id;
+              subcategory_id.add(op);
+            }
+
+          }
+        }
+        xhttp.open("get","/admin/product/sublist?topcategory_id="+obj.value,true);
+        xhttp.send();
+    }
+
+    //서브밋 버튼 - 상품 등록 요청하기
+    function regist(){
+      //유효성 체크
+      if(document.getElementById("topcategory_id").value=="0"){
+        alert("최상위 카테고리를 선택하셔야 합니다.");
+        return;
+      }
+      if(document.getElementById("subcategory_id").value=="0"){
+        alert("하위 카테고리를 선택하셔야 합니다.");
+        return;
+      }
+      if(document.getElementById("product_name").value==""){
+        alert("상품명을 입력하세요.");
+        document.getElementById("product_name").focus();
+        return;
+      }
+      if(document.getElementById("price").value==""){
+        alert("가격을 입력하세요.");
+        document.getElementById("price").focus();
+        return;
+      }
+      //isNaN : 숫자가 아니면 true반환
+      if(isNaN(document.getElementById("price").value)){
+        alert("가격은 숫자만 입력 가능합니다.");
+        document.getElementById("price").value="";
+        document.getElementById("price").focus();
+        return;
+      }
+      if(document.getElementById("brand").value==""){
+        alert("브랜드명 입력하세요.");
+        document.getElementById("brand").focus();
+        return;
+      }
+      if(document.getElementById("detail").value==""){
+        alert("상세 설명 입력하세요.");
+        document.getElementById("detail").focus();
+        return;
+      }
+      if(document.getElementById("product_img").value==""){
+        alert("상품 이미지를 선택하세요.");
+        return;
+      }
+      
+
+
+      // document.form1
+      //현재 페이지에 대해서 window나 dovument가 하나밖에 없기 때문에 즉 유일하기 때문에 생략가능
+      form1.action="/admin/product/regist";
+      form1.method="post";
+      form1.encoding="multipart/form-data"; //바이너리 파일이 form에 포함될 경우, 즉 텍스트 뿐 아니라 파일도 보낼 경우
+      form1.submit();
+    }
+
+</script>
+</head>
+<body>
+    
+    <!-- 탑 네비게이션 -->
+    <%- include ('../inc/top_navi')%>
+
+<h3>Contact Form</h3>
+
+<div class="container">
+  <form name="form1">
+    <select id="topcategory_id" name="topcategory_id" onchange="getSubList(this)">
+        <option value="0">상위 카테고리 선택</option>
+        <%for(var i=0;i<record.length;i++){%>
+            <%var topcategory = record[i];%>
+        <option value="<%=topcategory.topcategory_id%>"><%=topcategory.top_name%></option>
+        <%}%>
+    </select>
+    <select id="subcategory_id" name="subcategory_id">
+      <option value="0">하위 카테고리 선택</option>
+    </select>
+
+    <input type="text" id="product_name" name="product_name" placeholder="상품명">
+    <input type="text" id="price" name="price" placeholder="가격">
+    <input type="text" id="brand" name="brand" placeholder="브랜드">
+    <textarea placeholder="상세설명" style="height:200px" id="detail" name="detail"></textarea>
+    <input type="file" name="product_img" id="product_img">
+    <input type="checkbox">85
+    <input type="checkbox">90
+    <input type="checkbox">95
+    <input type="checkbox">100
+    <input type="checkbox">105
+    <input type="checkbox">110
+    <p></p>
+    <input type="button" value="Submit" onclick="regist()">
+  </form>
+</div>
+
+</body>
+</html>
